@@ -11,7 +11,7 @@ import { Fragment } from 'react'
 const data = [
     {
         id: '0',
-        question: 'Leo',
+        question: 'leo',
         reponse: 'Bonjour'
     },
     {
@@ -37,7 +37,8 @@ class Index extends React.Component {
         
         this.state = {
             message: "",
-            data: data
+            data: data,
+            LitsChat: []
         }
     }
 
@@ -54,21 +55,28 @@ class Index extends React.Component {
             incommingMsg: false,
             sendMsg: true
         }]
-        console.log(chats.message);
+        this.setState({LitsChat: [...chats]})
+       
         setTimeout(() => {
             this.IncommingMessage(this.state.message)
-        }, 1000)
-        this.setState({message: ''})
+            this.setState({message: ''})
+        }, 500)
+
+        
     }
 
-    IncommingMessage = (q) => {
+    IncommingMessage = q => {
+        console.log(q);
         for(let i=0; i< data.lenght; i++){
+            console.log(data[i].question);
             if(data[i].question.includes(q.toLowerCase())){
+                
                 chats = [...chats, { 
                     message: data[i].reponse,
                     incommingMsg: true,
                     sendMsg: false
                 }]
+                this.setState({LitsChat: [...chats]})
                 return;
             }
         }
@@ -77,6 +85,7 @@ class Index extends React.Component {
             incommingMsg: true,
             sendMsg: false
         }]
+        this.setState({LitsChat: [...chats]})
         return;
 
     }
