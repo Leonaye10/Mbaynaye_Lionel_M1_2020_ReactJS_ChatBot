@@ -1,144 +1,119 @@
-import React from 'react'
-import List from '@material-ui/core/List'
-import Container from '@material-ui/core/Container'
-import TextField from '@material-ui/core/TextField'
-import Button from '@material-ui/core/Button'
-import SendIcon from '@material-ui/icons/Send'
-import Message from './Message'
-import { Fragment } from 'react'
+import React from 'react';
+import List from '@material-ui/core/List';
 
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import SendIcon from '@material-ui/icons/Send';
+import Message from './Message';
+// import { Fragment } from 'react';
+//import Contacts from './Contacts';
 
-const data = [
-    {
-        id: '0',
-        question: 'leo',
-        reponse: 'Bonjour'
-    },
-    {
-        id: '1',
-        question: 'hi bot',
-        reponse: 'Hello'
-    },
-    {
-        id: '2',
-        question: 'Leo',
-        reponse: 'Bonjour'
-    },
-    {
-        id: '3',
-        question: 'hi bot',
-        reponse: 'Hello'
-    }
-]
-let chats = []
+import { connect } from 'react-redux';
+import store from '../../store';
+import { sendMessage, receveMessage } from './actions';
+
 class Index extends React.Component {
-    constructor(props) {
-        super(props)
-        
-        this.state = {
-            message: "",
-            data: data,
-            LitsChat: []
-        }
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      message: ""
     }
+  }
 
-    handleInput(e) {
-        this.setState({
-          message: e.target.value
-        })
-      }
-    
+  handleInput(e) {
+    this.setState({
+      message: e.target.value
+    })
+  }
 
-    onSendMessage = () => {
-        chats = [...chats, {
-            message: this.state.message,
-            incommingMsg: false,
-            sendMsg: true
-        }]
-        this.setState({LitsChat: [...chats]})
-       
-        setTimeout(() => {
-            this.IncommingMessage(this.state.message)
-            this.setState({message: ''})
-        }, 500)
 
-        
-    }
+  onSendMessage = () => {
+    const { dispatch } = store;
+    const { message } = this.state;
 
-    IncommingMessage = q => {
-        console.log(q);
-        for(let i=0; i< data.lenght; i++){
-            console.log(data[i].question);
-            if(data[i].question.includes(q.toLowerCase())){
-                
-                chats = [...chats, { 
-                    message: data[i].reponse,
-                    incommingMsg: true,
-                    sendMsg: false
-                }]
-                this.setState({LitsChat: [...chats]})
-                return;
-            }
-        }
-        chats = [...chats, { 
-            message: "Message non reconnu",
-            incommingMsg: true,
-            sendMsg: false
-        }]
-        this.setState({LitsChat: [...chats]})
+    dispatch(sendMessage(message));
+
+    setTimeout(() => {
+      this.IncommingMessage(message)
+      this.setState({ message: '' })
+    }, 500)
+  }
+
+  IncommingMessage = (q) => {
+    const { dispatch } = store;
+    const data = this.props.data;
+    for (let index = 0; index < data.length; index++) {
+      if (data[index].question.includes(q.toLowerCase())) {
+        dispatch(receveMessage(data[index].reponse));
         return;
+      }
+    }
+    dispatch(receveMessage('Message non reconnu'));
+  }
 
+  render() {
+
+    const styles = {
+      chatList: {
+        height: "85vh",
+        margin: "auto",
+        padding: 5,
+        overflowY: "scroll",
+        backgroundColor: '#282c34',
+      },
+      container: {
+        margin: 'auto',
+        width: "100%",
+      },
+      message: {
+        width: "95%",
+        color: 'white',
+      },
+      sendBtn: {
+        width: '5%',
+      }
     }
 
-    render() {
+    const { chats } = this.props.chatsList;
 
-        const styles = {
-            chatList: {
-                maxWidth: "1200px",
-                height: "85vh",
-                margin: "auto",
-                width: "100%",
-                padding: 5,
-                overflowY: "scroll"
+    return (
+        <div styles={styles.container}>
+          <List style={styles.chatList}>
+            {
+              chats.map((item, id) => (
+                <Message
+                  key={id}
+                  message={item.message}
+                  incommingMsg={item.incommingMsg}
+                  sendMsg={item.sendMsg}
+                />
+              ))
             }
-        }        
+          </List>
 
-        return (
-            <Fragment>
-                <List style={styles.chatList}>
-                    {
-                        chats.map((item, id) => (
-                            <Message 
-                                key={id}
-                                message={item.message}
-                                incommingMsg={item.incommingMsg}
-                                sendMsg={item.sendMsg}
-                            />
-                        ))
-                        
-                    }
-                   
-                </List>
-                <Container>
-                    <TextField 
-                        placeholder="Entrez un message"
-                        style={{width:"90%"}}
-                        value={this.state.message}
-                        onChange={(value) => this.handleInput(value)}
-                    />
-                    <Button
-                        color="primary"
-                        style={{width:"5%"}}
-                        onClick={()=> this.onSendMessage()}
-                        disabled={this.state.message? false : true}
-                    >
-                        <SendIcon/>
-                    </Button>
-                </Container>
-            </Fragment>
-        )
-    }
+          <TextField
+            placeholder="Entrez un message"
+            style={styles.message}
+            value={this.state.message}
+            onChange={(value) => this.handleInput(value)}
+          />
+          <Button
+            color="primary"
+            style={styles.sendBtn}
+            onClick={() => this.onSendMessage()}
+            disabled={this.state.message ? false : true}
+          >
+            <SendIcon />
+          </Button>
+        </div>
+    )
+  }
 }
 
+const mapToProps = (state) => ({
+  data: state.data,
+  chatsList: state.chatsList
+});
 
-export default Index
+export default connect(mapToProps)(Index);

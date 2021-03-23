@@ -5,17 +5,15 @@ import Chats from './Chats/Index'
 
 class Index extends React.Component {
 
-    render() {
-        return (
-            <Grid item xs={10}>
-                <Paper elevation={5}>
-                    <Chats/>
-                </Paper>
-            </Grid>
-        )
-    }
-   
+  render() {
+    return (
+      <Grid item xs={12}>
+        <Paper elevation={5}>
+          <Chats />
+        </Paper>
+      </Grid>
+    )
+  }
 }
-
 
 export default Index
